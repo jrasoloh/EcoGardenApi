@@ -8,9 +8,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MeteoService
 {
-    private $client;
-    private $apiKey;
-    private $cache;
+    private HttpClientInterface $client;
+    private string $apiKey;
+    private CacheInterface $cache;
 
     public function __construct(HttpClientInterface $client, CacheInterface $cache, string $openWeatherKey)
     {
