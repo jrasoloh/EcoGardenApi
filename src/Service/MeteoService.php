@@ -48,4 +48,14 @@ class MeteoService
             ];
         });
     }
+
+    /**
+     * Supprime le cache météo pour une ville donnée (Admin)
+     */
+    public function clearCache(string $city): void
+    {
+        $cacheKey = 'meteo_' . strtolower($city);
+
+        $this->cache->delete($cacheKey);
+    }
 }
