@@ -56,7 +56,26 @@ class ConseilController extends AbstractController
         return new JsonResponse($jsonConseil, 201, [], true);
     }
 
+    #[Route('/{id}', name: 'app_conseil_edit', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Accès réservé aux admins')]
+    public function edit(
+        Conseil $conseil,
+        Request $request,
+        ConseilManager $conseilManager,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $conseilManager->editConseil($conseil, $data);
+
+        $jsonConseil = $serializer->serialize($conseil, 'json', ['groups' => 'conseil:read']);
+
+        return new JsonResponse($jsonConseil, 200, [], true);
+    }
+
     #[Route('/{id}', name: 'app_conseil_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Accès réservé aux admins')]
     public function delete(Conseil $conseil, ConseilManager $conseilManager): JsonResponse
     {
         $conseilManager->deleteConseil($conseil);

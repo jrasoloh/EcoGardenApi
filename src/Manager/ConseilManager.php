@@ -56,6 +56,24 @@ class ConseilManager
     }
 
     /**
+     * Met à jour partiellement un conseil
+     */
+    public function editConseil(Conseil $conseil, array $data): Conseil
+    {
+        if (array_key_exists('description', $data)) {
+            $conseil->setDescription($data['description']);
+        }
+
+        if (array_key_exists('months', $data)) {
+            $conseil->setMonths($data['months']);
+        }
+
+        $this->entityManager->flush();
+
+        return $conseil;
+    }
+
+    /**
      * Supprime un conseil de la base de données
      */
     public function deleteConseil(Conseil $conseil): void
