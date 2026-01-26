@@ -3,40 +3,34 @@
 namespace App\Manager;
 
 use App\Entity\User;
+use App\Model\UserModel;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager
 {
-    private EntityManagerInterface $entityManager;
-    private UserPasswordHasherInterface $passwordHasher;
+    public function __construct(private readonly EntityManagerInterface $entityManager,
+                                private readonly UserPasswordHasherInterface $passwordHasher,
+                                private readonly UserRepository $userRepository
+    ) {}
 
-    public function __construct(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
+    public function registerUser(string $login, string $plainPassword, string $city): UserModel
     {
-        $this->entityManager = $entityManager;
-        $this->passwordHasher = $passwordHasher;
+        $userEntity = $this->userRepository->createUser($login, $plainPassword, $city);
+
+        return new UserModel(
+            id: $userEntity->getId(),
+            login: $userEntity->getLogin(),
+            city: $userEntity->getCity(),
+            roles: $userEntity->getRoles(),
+        );
     }
 
-    public function createUser(string $login, string $plainPassword, string $city): User
-    {
-        $user = new User();
-        $user->setLogin($login);
-        $user->setRoles(['ROLE_USER']);
-
-        $user->setCity($city);
-
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
-        $user->setPassword($hashedPassword);
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return $user;
-    }
-
-    public function editUser(User $user, array $data): User
+    public function editUser(User $user, array $data): UserModel
     {
         if (array_key_exists('login', $data)) {
             $newLogin = $data['login'];
@@ -77,12 +71,36 @@ class UserManager
         }
 
         $this->entityManager->flush();
-        return $user;
+
+        return new UserModel(
+            id: $user->getId(),
+            login: $user->getLogin(),
+            city: $user->getCity(),
+            roles: $user->getRoles()
+        );
     }
 
     public function removeUser(User $user): void
     {
         $this->entityManager->remove($user);
         $this->entityManager->flush();
+    }
+
+    public function editUserById(int $id, array $data): UserModel
+    {
+        $user = $this->userRepository->find($id);
+        if (!$user) {
+            throw new NotFoundHttpException("L'utilisateur n'existe pas");
+        }
+        return $this->editUser($user, $data);
+    }
+
+    public function removeUserById(int $id): void
+    {
+        $user = $this->userRepository->find($id);
+        if (!$user) {
+            throw new NotFoundHttpException("L'utilisateur n'existe pas");
+        }
+        $this->removeUser($user);
     }
 }

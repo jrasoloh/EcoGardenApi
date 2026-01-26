@@ -29,6 +29,8 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
 
         if ($statusCode === 404) {
             $message = "Ressource introuvable.";
+        } elseif ($statusCode === 403) {
+            $message = "Accès refusé. Vous n'avez pas les droits nécessaires pour effectuer cette action.";
         } else {
             $message = $exception->getMessage();
         }

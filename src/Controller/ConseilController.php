@@ -8,12 +8,16 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/conseil')]
 class ConseilController extends AbstractController
 {
+    /**
+     * @throws ExceptionInterface
+     */
     #[Route('/{mois}', name: 'app_conseil_mois', requirements: ['mois' => '\d+'], methods: ['GET'])]
     public function index(string $mois, ConseilManager $conseilManager, SerializerInterface $serializer): JsonResponse
     {
@@ -56,6 +60,9 @@ class ConseilController extends AbstractController
         return new JsonResponse($jsonConseil, 201, [], true);
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     #[Route('/{id}', name: 'app_conseil_edit', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Accès réservé aux admins')]
     public function edit(
