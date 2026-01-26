@@ -29,7 +29,11 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $allowedFields = ['login', 'city', 'password'];
+        if ($data === null) {
+            return new JsonResponse(['error' => "Format JSON invalide"], 400);
+        }
+
+        $allowedFields = ['login', 'city', 'password', 'roles'];
 
         foreach ($data as $key => $value) {
             if (!in_array($key, $allowedFields)) {

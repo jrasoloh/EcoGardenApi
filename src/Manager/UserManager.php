@@ -4,6 +4,7 @@ namespace App\Manager;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -60,8 +61,22 @@ class UserManager
             $user->setPassword($hashedPassword);
         }
 
-        $this->entityManager->flush();
+        if (array_key_exists('roles', $data)) {
+            if (!is_array($data['roles'])) {
+                throw new BadRequestHttpException("Le format des rôles est invalide (tableau attendu).");
+            }
 
+            $allowedRoles = ['ROLE_USER', 'ROLE_ADMIN'];
+            foreach ($data['roles'] as $role) {
+                if (!in_array($role, $allowedRoles)) {
+                    throw new BadRequestHttpException("Le rôle '$role' n'existe pas.");
+                }
+            }
+
+            $user->setRoles($data['roles']);
+        }
+
+        $this->entityManager->flush();
         return $user;
     }
 
