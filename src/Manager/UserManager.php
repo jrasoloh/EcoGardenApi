@@ -4,6 +4,7 @@ namespace App\Manager;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager
@@ -37,7 +38,17 @@ class UserManager
     public function editUser(User $user, array $data): User
     {
         if (array_key_exists('login', $data)) {
-            $user->setLogin($data['login']);
+            $newLogin = $data['login'];
+
+            if ($newLogin !== $user->getLogin()) {
+                $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['login' => $newLogin]);
+
+                if ($existingUser) {
+                    throw new ConflictHttpException("Le login '$newLogin' est déjà utilisé par un autre utilisateur.");
+                }
+
+                $user->setLogin($newLogin);
+            }
         }
 
         if (array_key_exists('city', $data)) {
