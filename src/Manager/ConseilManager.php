@@ -60,8 +60,8 @@ class ConseilManager
      */
     public function editConseil(Conseil $conseil, array $data): Conseil
     {
-        if (array_key_exists('description', $data)) {
-            $conseil->setDescription($data['description']);
+        if (array_key_exists('content', $data)) {
+            $conseil->setContent($data['content']);
         }
 
         if (array_key_exists('months', $data)) {
