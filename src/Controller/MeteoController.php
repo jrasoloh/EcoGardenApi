@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/meteo')]
 class MeteoController extends AbstractController
 {
-    private $meteoService;
+    private MeteoService $meteoService;
 
     public function __construct(MeteoService $meteoService)
     {
